@@ -1,35 +1,20 @@
-const helper = require("../helper/common-helper");
-const driverMdodel = require("../models/driver");
+const driverModel = require("../models/driver");
 const dbHandler = require("../db/db-handler");
 
 async function getDriverRegistered(req, res) {
-  let mandatoryFields = [
-    "name",
-    "email",
-    "phone_number",
-    "license_number",
-    "car_number"
-  ];
-
-  const isAllFieldsNotAvailable = helper.checkMandatoryFields(
-    req,
-    mandatoryFields
-  );
-  if (isAllFieldsNotAvailable.length) {
-    res
-      .status(400)
-      .send(
-        `Please check following fields are passed correctly in the request, ${isAllFieldsNotAvailable} .`
-      );
-  }
-
+  console.log("req>>>>>>", req);
   let registeredDriver;
-  try {
-    registeredDriver = await driverMdodel.create(req);
-  } catch (err) {
-    res.status(400).send(err.message);
+  if (req.phone_number && req.phone_number.toString().length !== 10) {
+    return res
+      .status(400)
+      .send({ status: "failure", reason: "Phone number should be 110 digit" });
   }
-  return registeredDriver;
+  try {
+    registeredDriver = await driverModel.create(req);
+  } catch (err) {
+    return res.status(400).send({ status: "failure", reason: err.message });
+  }
+  return res.status(201).send(registeredDriver);
 }
 
 module.exports = {

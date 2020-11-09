@@ -7,4 +7,8 @@ router.post("/register", function(req, res, next) {
   helper.getDriverRegistered(req.body, res);
 });
 
+router.post("/:id/sendLocation", function(req,res,next){
+  helper.storeDriverLocation(req,res);
+})
+
 module.exports = router;

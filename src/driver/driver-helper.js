@@ -20,19 +20,72 @@ async function getDriverRegistered(req, res) {
 }
 
 async function storeDriverLocation(req, res) {
+  if (!req.body.longitude || req.body.longitude === null) {
+    return res
+      .status(400)
+      .send({ status: "failure", reason: "longitude is required" });
+  }
+  if (!req.body.latitude || req.body.latitude === null) {
+    return res
+      .status(400)
+      .send({ status: "failure", reason: "longitude is required" });
+  }
   try {
-    await locationModel.create({
+    let obj = {
       driverId: driverId,
-      latitude: req.body.latitude,
-      longitude: req.body.longitude
-    });
+      coordinates: [
+        parseFloat(req.body.longitude),
+        parseFloat(req.body.latitude)
+      ] // [22.2475, 14.2547]  [longitude, latitude]
+    };
+    await locationModel.create(obj);
   } catch (err) {
     return res.status(400).send({ status: "failure", reason: err.message });
   }
   return res.status(202).send({ status: "success" });
 }
 
+async function getAvailableCabs(req, res) {
+  if (!req.body.longitude || req.body.longitude === null) {
+    return res
+      .status(400)
+      .send({ status: "failure", reason: "longitude is required" });
+  }
+  if (!req.body.latitude || req.body.latitude === null) {
+    return res
+      .status(400)
+      .send({ status: "failure", reason: "longitude is required" });
+  }
+  try {
+    const listOfCabs = await locationModel.find({
+      coordinates: {
+        $near: {
+          $geometry: {
+            coordinates: [
+              parseFloat(req.body.longitude),
+              parseFloat(req.body.latitude)
+            ],
+            $maxDistance: 4000
+          }
+        }
+      }
+    });
+    if (listOfCabs.length) {
+      let cabsAvaialable = [{}];
+      return res.status(200).send({ available_cabs: cabsAvaialable });
+    } else {
+      return res.status(200).send({ message: "No cabs available!" });
+    }
+  } catch (err) {
+    console.log("something worng happened!", err.message);
+    return res
+      .status(400)
+      .send({ status: "failure", reason: "something went wrong" });
+  }
+}
+
 module.exports = {
   getDriverRegistered,
-  storeDriverLocation
+  storeDriverLocation,
+  getAvailableCabs
 };

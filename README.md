@@ -20,3 +20,12 @@ PROJECT START STEPS:
             - npm start
     
     2. Go to http://localhost:8080 in your browser to view it.
+    
+ ABOUT:
+ 
+ Backend APIs written in nodeJs with mongo-in-memory-server. The app exposes following APIs.
+        
+        1. Register a driver
+        2. store drivers current location
+        3. return the list of available cabs within the 4km radius
+        
